@@ -15,11 +15,11 @@ keypoints:
 ---
 # Test Driven Development
 Test Driven Development (or TDD) has a history in agile development but put simply
-you're going to write tests *before* you write code (or nearly same time).  This
+you're going to write tests *before* you write code (or nearly the same time).  This
 is in contrast to the historical "waterfall" development cycle where tests were
 developed after code was written e.g. on a separate day or business quarter.
 
-You don't have to be a purist as long as your code ends up having tests.  Some
+You don't have to be a TDD purist as long as your code ends up having tests.  Some
 say TDD makes code less buggy, though that may not be strictly true.  Still, TDD
 provides at least three major benefits:
 
@@ -37,7 +37,8 @@ provides at least three major benefits:
  programmers generally despise).
 
 Often times when you write tests with existing code, you anchor your expectations
-based on what the code does, instead of brain storming on what a user could do.
+based on what the code does, instead of brain storming on what a user could do
+to break your system.
 
 ## Red, green, refactor
 
@@ -239,7 +240,7 @@ it is too long.  You won't have to type it so be descriptive!  Next we have the
 three steps in all tests: Arrange-Act-Assert (aka Given-When-Then)
 
 - Arrange: Set up the system in a particular way to test the feature you want.
-Consider edge cases, mocking database or files, building helper objects, etc.
+Consider edge cases, mocking databases or files, building helper objects, etc.
 - Act: Call the code you want to test
 - Assert: Confirm the observable outputs are what you expect.  Notice that the
 outputs here read like the actual output file.
@@ -260,8 +261,9 @@ whitespace will be accepted.  Let's replace those with explicit white space
     assert output[1] == '1\t1\t0'
     assert output[2] == '0\t0\t1'
 ```
-Since split strips off the newline at the end.  Now we fail (yay!) and it's due
-to something we have wanted to change anyways.  The pytest output says
+Since `split('\n')` strips off the newline at the end of each line.  Now we
+fail (yay!) and it's due to something we have wanted to change anyways.  The
+pytest output says
 ```bash
 E       AssertionError: assert '1\t1\t0\t' == '1\t1\t0'
 ```

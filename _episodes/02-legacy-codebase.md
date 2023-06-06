@@ -107,8 +107,10 @@ cases without testing smaller parts of a codebase.
 
 Like all tests, passing does not verify correctness just that the tests are not
 failing.  Still, it is reassuring that some larger refactoring isn't breaking
-published code!  Let's start with this simple input file:
+published code!  Let's start with this simple input file (the header is just
+for display here):
 ```input.txt
+#name	x1	y1	x2	y2
 a	0	0	2	2
 b	1	1	3	3
 c	10	10	11	11
@@ -167,8 +169,8 @@ printed.  This script can be run with CI and should act as the final step to
 ensure your outputs are as expected.  Think of tests like a funnel: you want to
 run quick tests frequently to catch most bugs early, on every file write. Slower
 tests can run prior to a git commit to catch the bugs that escaped the first round.
-Finally, the slowest most thorough tests can run via CI/CD on a PR and should
-catch a minority of bugs.  We will run this after making major changes.
+Finally, the slowest, most thorough tests run via CI/CD on a PR and should
+catch a minority of bugs.  We will run our end to end test after making major changes.
 
 You can also add more test files to this script but we want to move to a better
 testing framework ASAP!
