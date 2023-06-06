@@ -64,3 +64,15 @@ def test_read_rectangles_incorrect_number_of_coords_raise_error():
     with pytest.raises(ValueError) as error:
         overlap.read_rectangles(['a 1'])
     assert "Incorrect number of coordinates for 'a 1'" in str(error)
+
+def test_rects_overlap():
+    rectangles = {
+        'a': [0, 0, 2, 2],
+        'b': [1, 1, 3, 3],
+        'c': [10, 10, 11, 11],
+    }
+
+    assert overlap.rects_overlap(rectangles['a'], rectangles['a']) is True
+    assert overlap.rects_overlap(rectangles['a'], rectangles['b']) is True
+    assert overlap.rects_overlap(rectangles['b'], rectangles['a']) is True
+    assert overlap.rects_overlap(rectangles['a'], rectangles['c']) is False

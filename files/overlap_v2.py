@@ -8,15 +8,7 @@ def main(infile, outfile):
     for red_name, red_coords in rectangles.items():
         output_line = []
         for blue_name, blue_coords in rectangles.items():
-            # check if rects overlap
-            result = '1'
-
-            red_lo_x, red_lo_y, red_hi_x, red_hi_y = red_coords
-            blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue_coords
-
-            if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
-                    (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
-                result = '0'
+            result = '1' if rects_overlap(red_coords, blue_coords) else '0'
 
             output_line.append(result)
         outfile.write('\t'.join(output_line) + '\n')
@@ -39,6 +31,17 @@ def read_rectangles(rectangles: Iterable[str]) -> dict[str, list[float]]:
         value[1], value[3] = min(value[1], value[3]), max(value[1], value[3])
         result[name] = value
     return result
+
+
+def rects_overlap(red, blue) -> bool:
+    red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
+    blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
+
+    if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
+            (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
+        return False
+
+    return True
 
 
 if __name__ == "__main__":

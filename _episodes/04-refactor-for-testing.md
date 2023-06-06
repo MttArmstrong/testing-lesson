@@ -130,7 +130,7 @@ call.
 >> When you start refactoring like this go slow and in parts.  Make the function
 >> first and when the test_read_rectangles passes replace the code in the main
 >> method.  Your end to end test should still pass and tell you if something is
->> wrong.  Note we can remove the comment because the function name is self commenting
+>> wrong.  Note we can remove the comment because the function name is self documenting
 > {: .solution}
 {: .challenge}
 
@@ -162,7 +162,7 @@ With a small, testable method in place, we can start adding features and get
 creative.  Often you will take the mindset of an adversary of a codebase.  This
 is generally easier with someone else's code because you can think "I bet they
 did think of this" instead of "why didn't I think of this", but it gets easier
-in practice.
+with practice.
 
 Think of all the ways this code could break, all the things that aren't tested,
 and how you would expect them to be handled.  Remember users aren't perfect so
@@ -171,7 +171,6 @@ several lines or modules away.
 
 {: .challenge}
 > ### Red-Green-Refactor the `read_rectangles`
->
 > Pick one of the following and work through a red-green-refactor cycle to address
 > it.  Work on more as time permits.  Remember to keep each phase short and run
 > pytest often.  Stop adding code once a test starts passing.
@@ -181,8 +180,9 @@ several lines or modules away.
  - X and Y coordinates not equal?  (how are we not testing this!)
  - X and Y coordinates are not in increasing order?
  - Incorrect number of coordinates supplied?
+ - Any others you can think of?
 >
-> Often there isn't one right answer.  When the user give an empty file, should
+> Often there isn't one right answer.  When the user gives an empty file, should
 > that be an empty result or throw an error?  The answer may not matter, but
 > formalizing it as a test forces you to answer and document such questions.
 > Look up `pytest.raises` for how to test an exception is thrown.
@@ -223,7 +223,7 @@ several lines or modules away.
 >>def test_read_rectangles_incorrect_number_of_coords_raise_error():
 >>    with pytest.raises(ValueError) as error:
 >>        overlap.read_rectangles(['a 1'])
->>    assert "Incorrect number of coordinates for 'a 1
+>>    assert "Incorrect number of coordinates for 'a 1'" in str(error)
 >> ```
 >> ```python
 >># overlap.py
@@ -257,7 +257,93 @@ so it would be redundant to see if the main method has the same behavior.  Howev
 it would be useful to document what happens if an empty input file is supplied.
 
 ## Testing testing for overlap
+We have arrived to the largest needed refactoring, the overlap code.  This is the
+internals of the nested for loop.
+```python
+...
+for blue_name, blue_coords in rectangles.items():
+    # check if rects overlap
+    result = '1'
 
+    red_lo_x, red_lo_y, red_hi_x, red_hi_y = red_coords
+    blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue_coords
+
+    if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
+            (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
+        result = '0'
+...
+```
+Like before, we want to write a failing test first and extract this method.
+When that is in place we can start getting creative to test more interesting
+cases.  Finally, to support our original goal (reporting the percent overlap)
+we will change our return type to another rectangle.
+
+{: .challenge}
+> ### Red-Green-Refactor `rects_overlap`
+> Extract the inner for loop code.  The signature should be:
+>```python
+>def rects_overlap(red, blue) -> bool: ...
+>```
+>> ## Solution
+>> For testing, I'm using the simple input, when parsed from `read_rectangles`.
+>> Notice that if we had used `read_rectangles` to do the parsing we would add a
+>> dependency between that function and this one.  If we change (break) `read_rectangles`
+>> this would break too even though nothing is wrong with `rects_overlap`.
+>> However, uncoupling them completely doesn't capture how they interact in code.
+>> Consider the drawbacks before deciding what to use.
+>> ```python
+>> # test_overlap.py
+>>def test_rects_overlap():
+>>    rectangles = {
+>>        'a': [0, 0, 2, 2],
+>>        'b': [1, 1, 3, 3],
+>>        'c': [10, 10, 11, 11],
+>>    }
+>>
+>>    assert rects_overlap(rectangles['a'], rectangles['a']) is True
+>>    assert rects_overlap(rectangles['a'], rectangles['b']) is True
+>>    assert rects_overlap(rectangles['b'], rectangles['a']) is True
+>>    assert rects_overlap(rectangles['a'], rectangles['c']) is False
+>> ```
+>> ```python
+>># overlap.py
+>>def main(infile, outfile):
+>>    rectangles = read_rectangles(infile)
+>>
+>>    for red_name, red_coords in rectangles.items():
+>>        output_line = []
+>>        for blue_name, blue_coords in rectangles.items():
+>>            result = '1' if rects_overlap(red_coords, blue_coords) else '0'
+>>
+>>            output_line.append(result)
+>>        outfile.write('\t'.join(output_line) + '\n')
+>>
+>>...
+>>def rects_overlap(red, blue) -> bool:
+>>    red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
+>>    blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
+>>
+>>    if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
+>>            (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
+>>        return False
+>>
+>>    return True
+>> ```
+> {: .solution}
+{: .challenge}
+
+Now we can really put the function through it's paces.  Here are some
+rectangles to guide your testing:
+```
+   ------        ---------       -------    ---                                
+   |    |        |       |       |  |  |    | |                              
+   |  ------     | ----- |       |  |  |    -----                          
+   |  | |  |     | |   | |       -------      | |                                
+   ------  |     --|---|--                    ---                            
+      |    |       |   |                                                      
+      ------       -----                                                      
+```
+For each, consider swapping the red and blue labels and rotating 90 degrees.
 
 {% include links.md %}
 
