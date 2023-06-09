@@ -1,5 +1,6 @@
 import sys
 from collections.abc import Iterable
+from typing import Optional
 
 
 def main(infile, outfile):
@@ -33,15 +34,19 @@ def read_rectangles(rectangles: Iterable[str]) -> dict[str, list[float]]:
     return result
 
 
-def rects_overlap(red, blue) -> bool:
+def rects_overlap(red, blue) -> Optional[list[float]]:
     red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
     blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
 
     if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
             (red_lo_y >= blue_hi_y) or (red_hi_y <= blue_lo_y):
-        return False
+        return None
 
-    return True
+    x1 = max(red_lo_x, blue_lo_x)
+    y1 = max(red_lo_y, blue_lo_y)
+    x2 = min(red_hi_x, blue_hi_x)
+    y2 = min(red_hi_y, blue_hi_y)
+    return [x1, y1, x2, y2]
 
 
 if __name__ == "__main__":

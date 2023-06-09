@@ -100,7 +100,7 @@ def test_read_rectangles_simple(simple_input):
 ```
 
 Which fails because we don't have a method named `read_rectangles`.  Note that
-we have already decided on a name for the function, it's arguments and return
+we have already decided on a name for the function, its arguments and return
 values without touching our source code.
 
 ### Green
@@ -128,7 +128,7 @@ call.
 >>
 >> ```
 >> When you start refactoring like this go slow and in parts.  Make the function
->> first and when the test_read_rectangles passes replace the code in the main
+>> first and when the `test_read_rectangles` passes replace the code in the main
 >> method.  Your end to end test should still pass and tell you if something is
 >> wrong.  Note we can remove the comment because the function name is self documenting
 > {: .solution}
@@ -161,7 +161,7 @@ may want to support floats later (hint, we do!).
 With a small, testable method in place, we can start adding features and get
 creative.  Often you will take the mindset of an adversary of a codebase.  This
 is generally easier with someone else's code because you can think "I bet they
-did think of this" instead of "why didn't I think of this", but it gets easier
+didn't think of this" instead of "why didn't I think of this", but it gets easier
 with practice.
 
 Think of all the ways this code could break, all the things that aren't tested,
@@ -185,7 +185,7 @@ several lines or modules away.
 > Often there isn't one right answer.  When the user gives an empty file, should
 > that be an empty result or throw an error?  The answer may not matter, but
 > formalizing it as a test forces you to answer and document such questions.
-> Look up `pytest.raises` for how to test an exception is thrown.
+> Look up `pytest.raises` for how to test if an exception is thrown.
 >> ## Solution
 >> Here is one set of tests and passing code.  You may have chosen different
 >> behavior for some changes.
@@ -224,6 +224,10 @@ several lines or modules away.
 >>    with pytest.raises(ValueError) as error:
 >>        overlap.read_rectangles(['a 1'])
 >>    assert "Incorrect number of coordinates for 'a 1'" in str(error)
+>>
+>>    with pytest.raises(ValueError) as error:
+>>        overlap.read_rectangles(['a'])
+>>    assert "Incorrect number of coordinates for 'a'" in str(error)
 >> ```
 >> ```python
 >># overlap.py
@@ -255,6 +259,11 @@ pathological cases?  The answer is no (for most).  We already know our `read_rec
 will handle the incorrect number of coordinates by throwing an informative error
 so it would be redundant to see if the main method has the same behavior.  However,
 it would be useful to document what happens if an empty input file is supplied.
+
+This is more important than being efficient with our time writing tests.  Say
+we want to change the message printed for one of the improper input cases.  
+If the same function is tested multiple places we need to update multiple tests
+that are effectively covering the same feature.
 
 ## Testing testing for overlap
 We have arrived to the largest needed refactoring, the overlap code.  This is the
@@ -335,15 +344,183 @@ we will change our return type to another rectangle.
 Now we can really put the function through it's paces.  Here are some
 rectangles to guide your testing:
 ```
-   ------        ---------       -------    ---                                
-   |    |        |       |       |  |  |    | |                              
-   |  ------     | ----- |       |  |  |    -----                          
-   |  | |  |     | |   | |       -------      | |                                
-   ------  |     --|---|--                    ---                            
-      |    |       |   |                                                      
-      ------       -----                                                      
+
+     ┌───┐     ┌──┬──┐   ┌──────┐    ┌─┐    
+     │  ┌┼─┐   │  │  │   │ ┌──┐ │    └─┼─┐  
+     └──┼┘ │   └──┴──┘   └─┼──┼─┘      └─┘  
+        └──┘               └──┘             
 ```
 For each, consider swapping the red and blue labels and rotating 90 degrees.
+If you thought the rotation function would be useful elsewhere, you could
+add it to your script, but for now we will keep it in our pytest code.  First,
+write some failing unit tests of our new helper function:
+```python
+# test_overlap.py
+def test_rotate_rectangle():
+    rectangle = [1, 2, 3, 3]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [2, -3, 3, -1]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [-3, -3, -1, -2]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [-3, 1, -2, 3]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [1, 2, 3, 3]
+```
+Writing out the different permutations was challenging (for me, at least).
+Rotating a coordinate 90 degrees clockwise is simply swapping x and y while
+negating the new y value.  Then you need to produce the correct rectangle where
+x1 <= x2.
+```python
+# test_overlap.py
+def rotate_rectangle(rectangle):
+    x1, y1, x2, y2 = rectangle
+    x1, y1 = y1, -x1
+    x2, y2 = y2, -x2
+
+    # make sure x1 <= x2, value = [x1, y1, x2, y2]
+    x1, x2 = min(x1, x2), max(x1, x2)
+    y1, y2 = min(y1, y2), max(y1, y2)
+
+    return [x1, y1, x2, y2]
+```
+Notice this is *still* in our test file.  We don't want it in our project and
+it's just a helper for our tests.  It make sense to have it in our test file
+as we could use it elsewhere.  Since it's non-trivial we also have a test for
+it.
+
+{: .challenge}
+> ### Test the first overlap orientation
+> Start with the first type of overlap (over corners).  Set one rectangle to
+> `(-1, -1, 1, 1)` and place the second rectangle.  Transform the rectangle by
+> rotating it around the origin 3 times and test the `rects_overlap` function
+> for each overlap and red/blue assignment. Hint: pytest code is still python!
+>> ## Solution
+>> With our `rotate_rectangle` function in hand, the test function needs to test
+>> `rects_overlap` twice (swapping arguments each time) then rotate the second
+>> rectangle.  Note the choice of centering the first rectangle on the origin
+>> makes it rotationally invariant.  Here is a test function, notice that the
+>> assert statements have a clear message as it would otherwise be difficult to
+>> tell when a test failed.
+>> ```python
+>>def test_rects_overlap_permutations():
+>>    rectangle_1 = [-1, -1, 1, 1]
+>>    rectangle_2 = [0, 0, 2, 3]
+>>    result = True
+>>
+>>    for i in range(4):
+>>        assert overlap.rects_overlap(rectangle_1, rectangle_2) == result, (
+>>            f"Failed rects_overlap({rectangle_1}, {rectangle_2}) "
+>>            f"on rotation {i}")
+>>
+>>        assert overlap.rects_overlap(rectangle_2, rectangle_1) == result, (
+>>            f"Failed rects_overlap({rectangle_2}, {rectangle_1}) "
+>>            f"on rotation {i}")
+>>
+>>        rectangle_2 = rotate_rectangle(rectangle_2)
+>> ```
+>> I declare the result for reasons you see next.
+> {: .solution}
+{: .challenge}
+
+With our `test_rects_overlap_permutations` written for one rectangle, you may
+be tempted to copy and paste the function multiple times and declare a different
+`rectangle_2` and result for each orientation we came up with above.  To avoid
+code duplication, you could make our test a helper function, but pytest has
+a better builtin option, `parameterize`.
+
+## TODO Better intro to parameterize.
+
+Here is the parameterized version.  I added the unicode rectangle images because
+I already made them above and it seemed like a shame to not reuse.  Normally
+I wouldn't spend time making them but use a text descriptor.
+```python
+rectangle_strs = ['''
+┌───┐  
+│  ┌┼─┐
+└──┼┘ │
+   └──┘''','''
+┌──┬──┐
+│  │  │
+└──┴──┘''','''
+┌──────┐
+│ ┌──┐ │
+└─┼──┼─┘
+  └──┘''','''
+┌─┐  
+└─┼─┐
+  └─┘''','''
+┌─┐  
+└─┘ ┌─┐
+    └─┘''','''
+┌──────┐
+│  ┌─┐ │
+│  └─┘ │
+└──────┘''',
+                  ]
+@pytest.mark.parametrize(
+    "rectangle_2,rectangle_str,result",
+    [
+        ([0, 0, 2, 3], rectangle_strs[0], True),
+        ([1, -1, 2, 1], rectangle_strs[1], False),
+        ([0, -2, 0.5, 0], rectangle_strs[2], True),
+        ([1, 1, 2, 2], rectangle_strs[3], False),
+        ([2, 2, 3, 3], rectangle_strs[4], False),
+        ([0, 0, 0.5, 0.5], rectangle_strs[5], True),
+    ])
+def test_rects_overlap_permutations(rectangle_2, rectangle_str, result):
+    rectangle_1 = [-1, -1, 1, 1]
+
+    for i in range(4):
+        assert overlap.rects_overlap(rectangle_1, rectangle_2) == result, (
+            f"Failed rects_overlap({rectangle_1}, {rectangle_2}) "
+            f"on rotation {i}. {rectangle_str}")
+
+        assert overlap.rects_overlap(rectangle_2, rectangle_1) == result, (
+            f"Failed rects_overlap({rectangle_2}, {rectangle_1}) "
+            f"on rotation {i}. {rectangle_str}")
+
+        rectangle_2 = rotate_rectangle(rectangle_2)
+```
+Now failed tests will also show the image along with information to recreate
+any failures.  Running the above should fail... Time to get back to green.
+
+Note that with parameterize, each set of parameters will be run.  E.g. failing
+on the second rectangle will not affect the running on the third rectangle.
+
+{: .challenge}
+> ### Fix the code
+> Work on the source code for `rects_overlap` until all the code passes.
+> Hint: try `pytest --pdb test_overlap.py` which launched pdb at the site of the
+> first assertion error.
+>> ## Solution
+>> Only one set of rectangles is failing and it's on the first rotation.  That
+>> should indicate our tests are working properly and perhaps there is a more
+>> subtle bug hiding in our code.  Hopefully it didn't take too long to see there
+>> is a copy paste error in the if statement.
+>> ```python
+>>    if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
+>>            (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
+>>                               # ^ should be y!
+>> ```
+>> Notice that all our other tests didn't exercise this condition.  If we weren't
+>> rotating each case we would have also missed this.  At least the fix is easy.
+> {: .solution}
+{: .challenge}
+
+In contrast to the last implementation change we made (removing the trailing
+tab character) this bug fix is more serious.  You have revealed an error in
+code that was previously published!  Were this a real example, you should open
+an issue with the original code and consider rerunning any dependent analyses
+to see if results fundamentally change.  It may be by chance that branch of
+code never actually ran and it didn't matter if it were wrong.  Maybe only 1%
+of cases were miscalled. That would require just a new version to patch the
+issue.  Larger changes in the results may necessitate a revision or retraction
+of the original publication.
 
 {% include links.md %}
 

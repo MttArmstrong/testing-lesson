@@ -1,4 +1,4 @@
-import overlap_v2 as overlap
+import overlap_v3 as overlap
 from io import StringIO
 import pytest
 
@@ -65,6 +65,10 @@ def test_read_rectangles_incorrect_number_of_coords_raise_error():
         overlap.read_rectangles(['a 1'])
     assert "Incorrect number of coordinates for 'a 1'" in str(error)
 
+    with pytest.raises(ValueError) as error:
+        overlap.read_rectangles(['a'])
+    assert "Incorrect number of coordinates for 'a'" in str(error)
+
 def test_rects_overlap():
     rectangles = {
         'a': [0, 0, 2, 2],
@@ -72,7 +76,86 @@ def test_rects_overlap():
         'c': [10, 10, 11, 11],
     }
 
-    assert overlap.rects_overlap(rectangles['a'], rectangles['a']) is True
-    assert overlap.rects_overlap(rectangles['a'], rectangles['b']) is True
-    assert overlap.rects_overlap(rectangles['b'], rectangles['a']) is True
-    assert overlap.rects_overlap(rectangles['a'], rectangles['c']) is False
+    assert overlap.rects_overlap(rectangles['a'], rectangles['a']) == [0, 0, 2, 2]
+    assert overlap.rects_overlap(rectangles['a'], rectangles['b']) == [1, 1, 2, 2]
+    assert overlap.rects_overlap(rectangles['b'], rectangles['a']) == [1, 1, 2, 2]
+    assert overlap.rects_overlap(rectangles['a'], rectangles['c']) is None
+
+
+def rotate_rectangle(rectangle):
+    if rectangle is None:
+        return None
+    x1, y1, x2, y2 = rectangle
+    x1, y1 = y1, -x1
+    x2, y2 = y2, -x2
+
+    # make sure x1 <= x2, value = [x1, y1, x2, y2]
+    x1, x2 = min(x1, x2), max(x1, x2)
+    y1, y2 = min(y1, y2), max(y1, y2)
+
+    return [x1, y1, x2, y2]
+
+def test_rotate_rectangle():
+    rectangle = [1, 2, 3, 3]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [2, -3, 3, -1]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [-3, -3, -1, -2]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [-3, 1, -2, 3]
+
+    rectangle = rotate_rectangle(rectangle)
+    assert rectangle == [1, 2, 3, 3]
+
+    assert rotate_rectangle(None) is None
+
+rectangle_strs = ['''
+┌───┐  
+│  ┌┼─┐
+└──┼┘ │
+   └──┘''','''
+┌──┬──┐
+│  │  │
+└──┴──┘''','''
+┌──────┐
+│ ┌──┐ │
+└─┼──┼─┘
+  └──┘''','''
+┌─┐  
+└─┼─┐
+  └─┘''','''
+┌─┐  
+└─┘ ┌─┐
+    └─┘''','''
+┌──────┐
+│  ┌─┐ │
+│  └─┘ │
+└──────┘''',
+                  ]
+@pytest.mark.parametrize(
+    "rectangle_2,rectangle_str,result",
+    [
+        ([0, 0, 2, 3], rectangle_strs[0], [0, 0, 1, 1]),
+        ([1, -1, 2, 1], rectangle_strs[1], None),
+        ([0, -2, 0.5, 0], rectangle_strs[2], [0, -1, 0.5, 0]),
+        ([1, 1, 2, 2], rectangle_strs[3], None),
+        ([2, 2, 3, 3], rectangle_strs[4], None),
+        ([0, 0, 0.5, 0.5], rectangle_strs[5], [0, 0, 0.5, 0.5]),
+    ])
+def test_rects_overlap_permutations(rectangle_2, rectangle_str, result):
+    rectangle_1 = [-1, -1, 1, 1]
+
+    for i in range(4):
+        assert overlap.rects_overlap(rectangle_1, rectangle_2) == result, (
+            f"Failed rects_overlap({rectangle_1}, {rectangle_2}) "
+            f"on rotation {i}. {rectangle_str}")
+
+        assert overlap.rects_overlap(rectangle_2, rectangle_1) == result, (
+            f"Failed rects_overlap({rectangle_2}, {rectangle_1}) "
+            f"on rotation {i}. {rectangle_str}")
+
+        rectangle_2 = rotate_rectangle(rectangle_2)
+        result = rotate_rectangle(result)
