@@ -41,8 +41,8 @@ for red_name, red_coords in dict.items():
         # check if rects overlap
         result = '1'
 
-        red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
-        blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
+        red_lo_x, red_lo_y, red_hi_x, red_hi_y = red_coords
+        blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue_coods
 
         if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
                 (red_lo_y >= blue_hi_x) or (red_hi_y <= blue_lo_y):
@@ -107,10 +107,8 @@ cases without testing smaller parts of a codebase.
 
 Like all tests, passing does not verify correctness just that the tests are not
 failing.  Still, it is reassuring that some larger refactoring isn't breaking
-published code!  Let's start with this simple input file (the header is just
-for display here):
+published code!  Let's start with this simple input file (the header has the format #name	x1	y1	x2	y2):
 ```input.txt
-#name	x1	y1	x2	y2
 a	0	0	2	2
 b	1	1	3	3
 c	10	10	11	11
