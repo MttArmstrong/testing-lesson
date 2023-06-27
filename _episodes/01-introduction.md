@@ -17,7 +17,7 @@ Software testing involves the process of executing the software to discover any 
 3. Checking the correctness of test outputs.
 
 # When to test?
-Sooner
+Earlier a bug is detected, it is less costly to fix them. For example, a bug detected and fixed during coding is 50 times cheaper than detecting and fixing it after the software is deployed. Thus, executing tests as soon as possible would be benficial in the long run. Theoritically, tests can be created and executed even before the functional code is written. This is what is acually done in Test Driven Development (TDD) which we discuss little later. Ultimately, the bottom line is creating and executing tests should not be an afterthought. It should be an activity that should go hand-in-hand with development.
 
 {% include links.md %}
 
