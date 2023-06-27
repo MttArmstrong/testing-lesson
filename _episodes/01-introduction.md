@@ -3,9 +3,10 @@ title: "Introduction"
 teaching: 0
 exercises: 0
 questions:
-- "Key question (FIXME)"
+- "Why do we test software?"
 objectives:
-- "First learning objective. (FIXME)"
+- "Understand what is testing"
+- "Understand the goals of testing"
 keypoints:
 - "First key point. Brief Answer to questions. (FIXME)"
 ---
