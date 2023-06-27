@@ -42,21 +42,22 @@ to break your system.
 
 ## Red, green, refactor
 
-The basic cycle of work with TDD is called red, green, refactor:
-- Start by writing a failing test.  This is the red phase since your test runner
+The basic cycle of work with TDD is called **red**, **green**, **refactor**:
+- Start by writing a failing test.  This is the **red** phase since your test runner
 will show a failure, usually with a red color.  Only when you having a failing
 test can you add a feature.
-- Add only as much code to make the test pass (green).  You want to work on the code base
+- Add only as much code to make the test pass (**green**).  You want to work on the code base
 only until your tests are passing, then stop!  This is often difficult if you
 are struck by inspiration but try to slow down and add a note to come back to.
 Maybe you identified the next test to write!
-- Look over your code *and tests* and see if anything should be refactored.  At
+- Look over your code *and tests* and see if anything should be *refactored*. Refactoring is the process of restructuring or improving the internal structure of existing source code without changing its external behavior. It can involve  modifications to the code to make it more readable, maintainable, efficient, and adhering to best coding practices.   At
 this point your test suite is passing and you can really get creative.  If a change
 causes something to break you can easily undo it and get back to safety.  Also,
 having this as a separate step allows you to focus on testing and writing code
 in the other phases.  Remember, tests are code too and benefit from the same
 design considerations.
 
+You will be repeating these red, green, refactor steps multiple times until you are done with developing code. Therefore we need to automate the execution of tests using testing frameworks. Here we will be using **pytest**, which is a widely used testing framework for Python. It provides a comprehensive and flexible set of tools and features for writing and executing tests. 
 ## Test already!
 Now let's make sure pytest is set up and ready to test.
 > In a larger package the structure should follow what you've already been
