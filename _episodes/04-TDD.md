@@ -58,52 +58,6 @@ in the other phases.  Remember, tests are code too and benefit from the same
 design considerations.
 
 You will be repeating these red, green, refactor steps multiple times until you are done with developing code. Therefore we need to automate the execution of tests using testing frameworks. Here we will be using **pytest**, which is a widely used testing framework for Python. It provides a comprehensive and flexible set of tools and features for writing and executing tests. 
-## Test already!
-Now let's make sure pytest is set up and ready to test.
-> In a larger package the structure should follow what you've already been
-> taught, with source code and tests in different directories.  Here we will stick
-> in the same folder for simplicity.
-
-Pytest looks for files that start with `test_` and runs any functions in those
-files that start with `test_`.  In contrast to `unittest` or other x-unit style
-frameworks, pytest has one test statement, `assert` which works exactly like in
-normal python code.  Here are some pointless tests:
-```python
-# test_nothing.py
-
-def test_math():
-    assert 2 + 2 == 4
-
-def test_failure():
-    assert 0  # zero evaluates to false
-```
-
-In the same directory as your test files, run `pytest`:
-```bash
-$ pytest
-========================================== test session starts ==========================================
-platform linux -- Python 3.9.16, pytest-7.3.1, pluggy-1.0.0
-rootdir: ~/projects/testing-lesson/files
-plugins: anyio-3.6.2
-collected 2 items
-
-test_nothing.py .F                                                                                [100%]
-
-=============================================== FAILURES ================================================
-_____________________________________________ test_failure ______________________________________________
-
-    def test_failure():
-    >       assert 0  # zero evaluates to false
-    E       assert 0
-
-test_nothing.py:5: AssertionError
-======================================== short test summary info ========================================
-FAILED test_nothing.py::test_failure - assert 0
-====================================== 1 failed, 1 passed in 0.06s ======================================
-```
-
-Note that two tests were found.  Passing tests are marked with a green `.` while
-failures are `F` and exceptions are `E`.
 
 
 ## Importing overlap.py, red-green-refactor
