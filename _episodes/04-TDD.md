@@ -4,7 +4,7 @@ teaching: 0
 exercises: 0
 questions:
 - "Why should you write tests first?"
-- "What are the 3 phases of TDD"
+- "What are the 3 phases of TDD?"
 objectives:
 - "Start running tests with pytest."
 - "Replace the end-to-end test with a pytest version."
@@ -102,7 +102,7 @@ FAILED test_nothing.py::test_failure - assert 0
 ====================================== 1 failed, 1 passed in 0.06s ======================================
 ```
 
-Note that two tests were found.  Passing test are marked with a green `.` while
+Note that two tests were found.  Passing tests are marked with a green `.` while
 failures are `F` and exceptions are `E`.
 
 
@@ -237,7 +237,7 @@ def test_end_to_end():
 Since this is the first non-trivial test, let's spend a moment going over it.
 Like before we import our module and make our test function start with `test_`.
 The actual name of the function is for your benefit only so don't be worried if
-it is too long.  You won't have to type it so be descriptive!  Next we have the
+it is "too long".  You won't have to type it so be descriptive!  Next we have the
 three steps in all tests: Arrange-Act-Assert (aka Given-When-Then)
 
 - Arrange: Set up the system in a particular way to test the feature you want.

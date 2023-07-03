@@ -65,7 +65,7 @@ makes your code better!  It's just too hard to write tests for bad code; if you
 # Safe Refactoring and TDD
 ## Reading in Rectangles
 Now back to our overlap code.  You have inherited a monolithic main method,
-how do you go about breaking it up?  Some IDEs have function for extracting
+how do you go about breaking it up?  Some IDEs have functions for extracting
 a method or attribute but we are following TDD and need to write a failing test
 first.  Let's start with the first portion of our existing main method, reading
 in the `dict`:
@@ -130,7 +130,7 @@ call.
 >> When you start refactoring like this go slow and in parts.  Make the function
 >> first and when the `test_read_rectangles` passes replace the code in the main
 >> method.  Your end to end test should still pass and tell you if something is
->> wrong.  Note we can remove the comment because the function name is self documenting
+>> wrong.  Note we can remove the comment because the function name is self documenting.
 > {: .solution}
 {: .challenge}
 
@@ -161,10 +161,10 @@ may want to support floats later (hint, we do!).
 With a small, testable method in place, we can start adding features and get
 creative.  Often you will take the mindset of an adversary of a codebase.  This
 is generally easier with someone else's code because you can think "I bet they
-didn't think of this" instead of "why didn't I think of this", but it gets easier
-with practice.
+didn't think of this" instead of "why didn't I think of this", but being self
+deprecating gets easier with practice.
 
-Think of all the ways this code could break, all the things that aren't tested,
+Think of all the ways the overlap code could break, all the things that aren't tested,
 and how you would expect them to be handled.  Remember users aren't perfect so
 expect non-optimal inputs.  It's better to fail early (and descriptively) than
 several lines or modules away.
@@ -250,7 +250,7 @@ several lines or modules away.
 >>    return result
 >> ```
 >> Notice how the test code is much longer than the actual source code, this is
->> typical for well-tested code
+>> typical for well-tested code.
 > {: .solution}
 {: .challenge}
 
@@ -260,10 +260,12 @@ will handle the incorrect number of coordinates by throwing an informative error
 so it would be redundant to see if the main method has the same behavior.  However,
 it would be useful to document what happens if an empty input file is supplied.
 
-This is more important than being efficient with our time writing tests.  Say
-we want to change the message printed for one of the improper input cases.  
-If the same function is tested multiple places we need to update multiple tests
-that are effectively covering the same feature.
+The decision not to test something in multiple places is more important than
+being efficient with our time writing tests.  Say we want to change the message
+printed for one of the improper input cases.  If the same function is tested
+multiple places we need to update multiple tests that are effectively covering
+the same feature.  Remember that tests are code and should be kept DRY.  Tests that
+are hard to change don't get run and code eventually degrades back to a legacy version.
 
 ## Testing testing for overlap
 We have arrived to the largest needed refactoring, the overlap code.  This is the
@@ -389,9 +391,8 @@ def rotate_rectangle(rectangle):
     return [x1, y1, x2, y2]
 ```
 Notice this is *still* in our test file.  We don't want it in our project and
-it's just a helper for our tests.  It make sense to have it in our test file
-as we could use it elsewhere.  Since it's non-trivial we also have a test for
-it.
+it's just a helper for our tests, we could use it elsewhere in later tests.
+Since the function is non-trivial we also have it tested.
 
 {: .challenge}
 > ### Test the first overlap orientation
@@ -495,7 +496,7 @@ on the second rectangle will not affect the running on the third rectangle.
 {: .challenge}
 > ### Fix the code
 > Work on the source code for `rects_overlap` until all the code passes.
-> Hint: try `pytest --pdb test_overlap.py` which launched pdb at the site of the
+> Hint: try `pytest --pdb test_overlap.py` which launches pdb at the site of the
 > first assertion error.
 >> ## Solution
 >> Only one set of rectangles is failing and it's on the first rotation.  That

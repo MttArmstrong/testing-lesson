@@ -78,6 +78,7 @@ outfile.close()
 > > 5. Shadowing `dict` keywords
 > > 6. Trailing tab on the end of each output line
 > > 7. Not using context managers for file io
+> >
 > > And likely many more!
 > {: .solution}
 {: .challenge}
@@ -161,7 +162,7 @@ python overlap_v0.py input.txt new_output.txt
 # compare the outputs
 cmp output.txt new_output.txt && echo 'passes'
 ```
-When cmp is successful (no difference between files) `passes` will be echoed to
+When `cmp` is successful (no difference between files) `passes` will be echoed to
 the terminal.  When it fails the byte and line number that differs will be
 printed.  This script can be run with CI and should act as the final step to
 ensure your outputs are as expected.  Think of tests like a funnel: you want to
