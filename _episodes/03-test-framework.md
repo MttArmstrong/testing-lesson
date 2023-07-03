@@ -74,11 +74,52 @@ Let's understand writing a test case using the following fucntion that computes 
 
 ```python
 # sample_calc.py
-
 def func(x):
     return x - 1
 ```
 A typical test case consits of the following components:
-1. Test input
-2. Calling the function under test with the test input
-3. Compare the output with the expected output
+1. A test input.
+2. A call to the function under test with the test input.
+3. A statement to compare the output with the expected output.
+
+Following is a simple test case written to test func(x). Note that we have given a descriptive name to show what function is tested and and with what type of input. This is a good practice to increase the readability of tests. The test input here is 3 and the expected output is 4. The assert statement checks the equality of the two.
+
+```python
+#test_sample_calc.py
+import sample_calc as sc
+
+def test_func_for_positive_int():
+    assert sc.func(3) == 4
+```
+When the test is executed it is going to fail due to the bug.
+```bash
+$ pytest test_sample_calc.py 
+============================= test session starts ==============================
+platform darwin -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
+rootdir: /Volumes/Data/Work/research/INTERSECT2023/TestingLesson
+plugins: anyio-3.5.0
+collected 1 item                                                               
+
+test_sample_calc.py F                                                    [100%]
+
+=================================== FAILURES ===================================
+_________________________________ test_answer __________________________________
+
+    def test_answer():
+>       assert sc.func(3) == 4
+E       assert 2 == 4
+E        +  where 2 = <function func at 0x7fe290e39160>(3)
+E        +    where <function func at 0x7fe290e39160> = sc.func
+
+test_sample_calc.py:4: AssertionError
+=========================== short test summary info ============================
+FAILED test_sample_calc.py::test_answer - assert 2 == 4
+============================== 1 failed in 0.10s ===============================
+
+```
+
+{: .challenge}
+1. Fix the bug in the code.
+2. Add two tests test with a negative number and zero.
+
+Now that we know how to use the pytest test framework, we can use it with our legacy code base!
