@@ -68,7 +68,7 @@ FAILED test_nothing.py::test_failure - assert 0
 Note that two tests were found.  Passing tests are marked with a green `.` while
 failures are `F` and exceptions are `E`.
 
-## Writng working test cases
+## Writng actual test cases
 
 Let's understand writing a test case using the following fucntion that computes that is supporse to compute x + 1 given x. However, note that it has a very obvious bug.
 
@@ -122,4 +122,54 @@ FAILED test_sample_calc.py::test_answer - assert 2 == 4
 1. Fix the bug in the code.
 2. Add two tests test with a negative number and zero.
 
-Now that we know how to use the pytest test framework, we can use it with our legacy code base!
+Now that we know how to use the pytest framework, we can use it with our legacy code base!
+
+# What is code (test) coverage
+
+The term *code coverage* or *coverage* is used to refer to the code constructs such as statments and branches executed by your test cases. 
+
+Note: It is not recommended to create test cases to simply to cover the code. This can lead to creating useless test cases. Rather, coverage should be used to learn about which parts of the code are not executed by a test case and use that infomation to augment test cases to check the respective functinality of th the code.
+
+We will be using [Coverage.py] (https://coverage.readthedocs.io/en/7.2.7/#) to calculate the coverage of the test cases that we computed above. Follow the instructions [here] (https://coverage.readthedocs.io/en/7.2.7/install.html) to install Coverage.py.
+
+Now let's use Coverage.py to check the coverage of the tests we created for fun(x), To run your tests using pytest under coverage you need to use the **coverage run** command:
+```bash
+$ coverage run -m pytest test_sample_calc.py 
+============================= test session starts ==============================
+platform darwin -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
+rootdir: /Volumes/Data/Work/research/INTERSECT2023/TestingLesson
+plugins: anyio-3.5.0
+collected 1 item                                                               
+
+test_sample_calc.py F                                                    [100%]
+
+=================================== FAILURES ===================================
+_________________________________ test_answer __________________________________
+
+    def test_answer():
+>       assert sc.func(3) == 4
+E       assert 2 == 4
+E        +  where 2 = <function func at 0x7fab8ca2be50>(3)
+E        +    where <function func at 0x7fab8ca2be50> = sc.func
+
+test_sample_calc.py:4: AssertionError
+=========================== short test summary info ============================
+FAILED test_sample_calc.py::test_answer - assert 2 == 4
+============================== 1 failed in 0.31s ===============================
+```
+To get a report of the coverage use the command **coverage repoart**:
+```bash
+$ coverage report
+Name                  Stmts   Miss  Cover
+-----------------------------------------
+sample_calc.py            2      0   100%
+test_sample_calc.py       3      0   100%
+-----------------------------------------
+TOTAL                     5      0   100%
+```
+To get the coverage of both branches and statments you can use the **
+Note the statement coverage of sample_calc.py which is 100% right now.  We can also speciafically check for the executed branches using the **--branch** flag with the **coverage run** command. You can use the **-m** flag with the **coverage report** command to see which statments are missed with the test cases if there is any and update the test cases accordingly.
+
+
+
+
