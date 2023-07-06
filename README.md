@@ -1,4 +1,4 @@
-# FIXME Lesson title
+# Testing
 
 This repository generates the corresponding lesson website from [INTERESECT](https://intersect-training.org/) repertoire of lessons.
 The lesson format and structure is based off the [The Carpentries](https://carpentries.org/).
