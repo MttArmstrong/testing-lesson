@@ -24,20 +24,43 @@ class Rectangle:
     def area(self):
         return (self.x2-self.x1) * (self.y2-self.y1)
 
+    def overlap(self, other):
+        if (self.x1 >= other.x2) or \
+                (self.x2 <= other.x1) or \
+                (self.y1 >= other.y2) or \
+                (self.y2 <= other.y1):
+            return None
+
+        return Rectangle(
+            x1=max(self.x1, other.x1),
+            y1=max(self.y1, other.y1),
+            x2=min(self.x2, other.x2),
+            y2=min(self.y2, other.y2),
+        )
+
+    def rotate(self):
+        return Rectangle(
+            x1=self.y1,
+            y1=-self.x1,
+            x2=self.y2,
+            y2=-self.x2,
+        )
+
 
 def main(infile, outfile):
     rectangles = read_rectangles(infile)
 
-    for red_name, red_coords in rectangles.items():
+    for red_name, red_rect in rectangles.items():
         output_line = []
-        for blue_name, blue_coords in rectangles.items():
-            result = '1' if rects_overlap(red_coords, blue_coords) else '0'
+        for blue_name, blue_rect in rectangles.items():
+            overlap = red_rect.overlap(blue_rect)
+            result = str(overlap.area()) if overlap else '0'
 
             output_line.append(result)
         outfile.write('\t'.join(output_line) + '\n')
 
 
-def read_rectangles(rectangles: Iterable[str]) -> dict[str, list[float]]:
+def read_rectangles(rectangles: Iterable[str]) -> dict[str, Rectangle]:
     result = {}
     for rectangle in rectangles:
         name, *coords = rectangle.split()
@@ -46,29 +69,9 @@ def read_rectangles(rectangles: Iterable[str]) -> dict[str, list[float]]:
         except ValueError:
             raise ValueError(f"Non numeric value provided as input for '{rectangle}'")
 
-        if len(value) != 4:
-            raise ValueError(f"Incorrect number of coordinates for '{rectangle}'")
+        result[name] = Rectangle.from_list(value)
 
-        # make sure x1 <= x2, value = [x1, y1, x2, y2]
-        value[0], value[2] = min(value[0], value[2]), max(value[0], value[2])
-        value[1], value[3] = min(value[1], value[3]), max(value[1], value[3])
-        result[name] = value
     return result
-
-
-def rects_overlap(red, blue) -> Optional[list[float]]:
-    red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
-    blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
-
-    if (red_lo_x >= blue_hi_x) or (red_hi_x <= blue_lo_x) or \
-            (red_lo_y >= blue_hi_y) or (red_hi_y <= blue_lo_y):
-        return None
-
-    x1 = max(red_lo_x, blue_lo_x)
-    y1 = max(red_lo_y, blue_lo_y)
-    x2 = min(red_hi_x, blue_hi_x)
-    y2 = min(red_hi_y, blue_hi_y)
-    return [x1, y1, x2, y2]
 
 
 if __name__ == "__main__":
