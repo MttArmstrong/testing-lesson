@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Making Big Changes with Tests"
 teaching: 0
 exercises: 0
 questions:
@@ -171,7 +171,193 @@ as well.
 
 ## A `Rectangle` Object
 Any decent OOP developer would be pulling their hair over using a list of 4
-numbers as a rectangle when you could have a full object hierarchy!
+numbers as a rectangle when you could have a full object hierarchy!  We have
+another design decision before we really dig into the changes, how much should
+we support the old format of a rectangle as a list of numbers?  Coming from
+strict, static typing you may be inclined to say "not at all" but python gains
+power from its duck typing.
+
+Consider adding support for comparing a rectangle to a list of numbers. 
+If you support lists fully we can maintain the same tests.  However, a user
+may not expect a list to equal a rectangle and could cause problems with other code.
+Since we want to focus on writing tests instead of advanced python we will try
+to replace everything with rectangles.  In real applications you may want to
+transiently add support for comparisons to lists so the tests pass to confirm
+any other logic is sound.  After the tests are converted to rectangles you
+would alter your `__eq__` method to only compare with other rectangles.
+
+Without getting carried away, we want our rectangles to support
+- Construction from a list of numbers or with named arguments
+- Comparison with other rectangles, primarily for testing
+- Calculation of area
+- An overlap function with a signature like `def overlap(self, other: Rectangle) -> Rectangle`.
+
+Afterwards, our main loop code will change from
+```python
+result = '1' if rects_overlap(red_coords, blue_coords) else '0'
+# to
+overlap_area = red_rectangle.overlap(blue_rectangle).area()
+```
+We will also need to change code in our `read_rectangles` and `rects_overlap`
+functions as well as `main`.  
+
+{: .challenge}
+> ### Order of Operations
+> Should we start with converting our existing tests or making new tests for
+> the rectangle object?
+>> ## Solution
+>> It's better to work from bottom up, e.g. test creating a rectangle before
+>> touching `read_rectangles`.
+>>
+>> Imaging a red, green, refactor cycle where you start with updating `read_rectangles`
+>> to return a (yet unimplemented) Rectangle object.  First change your tests to
+>> expect a Rectangle to get them failing.  The problem is to get them passing
+>> you need to add code to create a rectangle and test for equality.  It's possible
+>> but then you don't have unit tests for those functions.  Furthermore, that
+>> breaks with the idea that TDD cycles should be short; you have to add a
+>> lot of code to get things passing!
+> {: .solution}
+{: .challenge}
+
+### TDD: Creating Rectangles
+Starting with a new test, we will simply check that a new rectangle can be
+created from named arguments.
+```python
+# test_overlap.py
+def test_create_rectangle_named_parameters():
+    assert overlap.Rectangle(x1=1.1, x2=2, y1=4, y2=3)
+```
+Fails because there is no Rectangle object yet.  To get green, we are going
+to use a python dataclass:
+```python
+# overlap.py
+from dataclasses import dataclass
+
+@dataclass
+class Rectangle:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+```
+The `dataclass` produces a default `__init__` and `__eq__`.
+
+How about rectangles from lists?
+```python
+# test_overlap.py
+def test_create_rectangle_from_list():
+    assert overlap.Rectangle.from_list([1.1, 4, 2, 3])
+```
+Here we are using the order of parameters matching the existing implementation.
+The code uses a bit of advanced python but should be clear:
+
+```python
+# overlap.py
+class Rectangle:
+    # ...
+    @classmethod
+    def from_list(cls, coordinates: list[float]):
+        x1, y1, x2, y2 = coordinates
+        return cls(x1=x1, y1=y1, x2=x2, y2=y2)
+```
+
+And let's add a test for the incorrect number of values in the list:
+```python
+# test_overlap.py
+def test_create_rectangle_from_list_wrong_number_of_args():
+    with pytest.raises(ValueError) as error:
+        overlap.Rectangle.from_list([1.1, 4, 2])
+    assert "Incorrect number of coordinates " in str(error)
+    with pytest.raises(ValueError) as error:
+        overlap.Rectangle.from_list([1.1, 4, 2, 2, 2])
+    assert "Incorrect number of coordinates " in str(error)
+```
+And update the code.
+```python
+# overlap.py
+class Rectangle:
+    # ...
+    @classmethod
+    def from_list(cls, coordinates: list[float]):
+        if len(coordinates) != 4:
+            raise ValueError(f"Incorrect number of coordinates for '{coordinates}'")
+        x1, y1, x2, y2 = coordinates
+        return cls(x1=x1, y1=y1, x2=x2, y2=y2)
+```
+Notice that we now have some code duplication since we use the same check in 
+`read_rectangles`.  But we can't remove it until we start using the Rectangle
+there.
+
+### TDD: Testing equality
+Instead of checking our rectangles are just not None, let's see if they are
+what we expect:
+
+```python
+# test_overlap.py
+def test_create_rectangle_named_parameters():
+    assert overlap.Rectangle(1.1, 4, 2, 3) == overlap.Rectangle(1.1, 3, 2, 4)
+    assert overlap.Rectangle(x1=1.1, x2=2, y1=4, y2=3) == overlap.Rectangle(1.1, 3, 2, 4)
+
+
+def test_create_rectangle_from_list():
+    assert overlap.Rectangle.from_list([1.1, 4, 2, 3]) == overlap.Rectangle(1.1, 3, 2, 4)
+```
+Here we use unnamed parameters to check for equality.  Here the order of attributes
+in the dataclass determines what gets assigned.  Since that's fairly brittle,
+consider adding `kw_only` for production code.
+
+This fails not because of an issue with `__eq__` but the `__init__`, we aren't
+ensuring our expected ordering of `x1 <= x2`.  You could overwrite `__init__`
+but instead we will use a `__post_init__` to valid the attributes.
+```python
+# overlap.py
+@dataclass
+class Rectangle:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+    def __post_init__(self):
+        self.x1, self.x2 = min(self.x1, self.x2), max(self.x1, self.x2)
+        self.y1, self.y2 = min(self.y1, self.y2), max(self.y1, self.y2)
+```
+Note this also fixes the issue with `from_list` as it calls `__init__` as well.
+
+### TDD: Calculate Area
+For area we can come up with a few simple tests:
+```python
+# test_overlap.py
+def test_rectangle_area():
+    assert overlap.Rectangle(0, 0, 1, 1).area() == 1
+    assert overlap.Rectangle(0, 0, 1, 2).area() == 2
+    assert overlap.Rectangle(0, 1, 2, 2).area() == 2
+    assert overlap.Rectangle(0, 0, 0, 0).area() == 0
+    assert overlap.Rectangle(0, 0, 0.3, 0.3).area() == 0.09
+    assert overlap.Rectangle(0.1, 0, 0.4, 0.3).area() == 0.09
+```
+The code shouldn't be too surprising:
+```python
+# overlap.py
+@dataclass
+class Rectangle:
+    ...
+
+    def area(self):
+        return (self.x2-self.x1) * (self.y2-self.y1)
+```
+But you may be surprised that the last assert is failing, even though the second
+to last is passing.  Again we are struck by the limits of floating point precision.
+{: .challenge}
+> ### Fix the tests
+> Fix the issue of floating point comparison.  Hint, look up `pytest.approx`.
+>> ## Solution
+>> ```python
+>>    assert overlap.Rectangle(0.1, 0, 0.4, 0.3).area() == pytest.approx(0.09)
+>> ```
+> {: .solution}
+{: .challenge}
+
 
 
 {% include links.md %}

@@ -1,4 +1,4 @@
-import overlap_v3 as overlap
+import overlap_v4 as overlap
 from io import StringIO
 import pytest
 
@@ -159,3 +159,30 @@ def test_rects_overlap_permutations(rectangle_2, rectangle_str, result):
 
         rectangle_2 = rotate_rectangle(rectangle_2)
         result = rotate_rectangle(result)
+
+
+def test_create_rectangle_named_parameters():
+    assert overlap.Rectangle(1.1, 4, 2, 3) == overlap.Rectangle(1.1, 3, 2, 4)
+    assert overlap.Rectangle(x1=1.1, x2=2, y1=4, y2=3) == overlap.Rectangle(1.1, 3, 2, 4)
+
+
+def test_create_rectangle_from_list():
+    assert overlap.Rectangle.from_list([1.1, 4, 2, 3]) == overlap.Rectangle(1.1, 3, 2, 4)
+
+
+def test_create_rectangle_from_list_wrong_number_of_args():
+    with pytest.raises(ValueError) as error:
+        overlap.Rectangle.from_list([1.1, 4, 2])
+    assert "Incorrect number of coordinates " in str(error)
+    with pytest.raises(ValueError) as error:
+        overlap.Rectangle.from_list([1.1, 4, 2, 2, 2])
+    assert "Incorrect number of coordinates " in str(error)
+
+
+def test_rectangle_area():
+    assert overlap.Rectangle(0, 0, 1, 1).area() == 1
+    assert overlap.Rectangle(0, 0, 1, 2).area() == 2
+    assert overlap.Rectangle(0, 1, 2, 2).area() == 2
+    assert overlap.Rectangle(0, 0, 0, 0).area() == 0
+    assert overlap.Rectangle(0, 0, 0.3, 0.3).area() == 0.09
+    assert overlap.Rectangle(0.1, 0, 0.4, 0.3).area() == pytest.approx(0.09)
