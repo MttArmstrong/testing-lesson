@@ -1,7 +1,7 @@
 ---
 title: "Working with Legacy Code"
-teaching: 0
-exercises: 0
+teaching: 10
+exercises: 15
 questions:
 - "What is legacy code?"
 - "Why should you test legacy code before changing it?"

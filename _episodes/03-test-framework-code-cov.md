@@ -1,7 +1,7 @@
 ---
 title: "Test framework"
-teaching: 0
-exercises: 0
+teaching: 10
+exercises: 15
 questions:
 - "What is a test framework?"
 - "How to write test cases using a test frmework?"
