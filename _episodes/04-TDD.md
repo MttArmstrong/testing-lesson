@@ -101,8 +101,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Now pytest should fail on `test_failure.py`.  You can limit which tests are
-run by listing the test files or subdirectories as arguments.
+Now execute test_overlap.py with pytest:
 
 ```bash
 $ pytest test_overlap.py
