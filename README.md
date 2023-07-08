@@ -1,4 +1,4 @@
-# FIXME Lesson title
+# Testing
 
 [![Create a Slack Account with us](https://img.shields.io/badge/Create_Slack_Account-The_Carpentries-071159.svg)](https://swc-slack-invite.herokuapp.com/)
 
@@ -24,9 +24,9 @@ Look for the tag ![good_first_issue](https://img.shields.io/badge/-good%20first%
 
 Current maintainers of this lesson are 
 
-* FIXME
-* FIXME
-* FIXME
+* Troy J. Comi (tcomi@princeton.edu)
+* Upulee Kanewala (upulee.kanewala@unf.edu)
+* Gabriel Perez-Giz (gabe.perezgiz@nyu.edu)
 
 
 ## Authors
