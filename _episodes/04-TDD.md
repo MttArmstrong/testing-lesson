@@ -1,7 +1,7 @@
 ---
 title: "Test Driven Development"
-teaching: 0
-exercises: 0
+teaching: 15
+exercises: 15
 questions:
 - "Why should you write tests first?"
 - "What are the 3 phases of TDD?"
