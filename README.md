@@ -21,8 +21,9 @@ If you contribute to this lesson and would like to acknowledge specific funding 
 
 The contributing author(s) to this lesson are:
 
-* FIXME
-* FIXME
+* Troy J. Comi (tcomi@princeton.edu)
+* Upulee Kanewala (upulee.kanewala@unf.edu)
+* Gabriel Perez-Giz (gabe.perezgiz@nyu.edu)
 
 
 ## Maintainer(s)
