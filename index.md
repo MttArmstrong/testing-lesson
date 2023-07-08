@@ -11,7 +11,7 @@ FIXME: home page introduction
 
 > ## Prerequisites
 >
-> FIXME
+> Working knowledge of Python
 {: .prereq}
 
 {% include links.md %}
