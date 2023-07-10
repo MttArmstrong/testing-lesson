@@ -147,6 +147,8 @@ guard?
 > {: .solution}
 {: .challenge}
 
+After refactoring save the code as overlap_v1.py.
+
 ## End-to-end testing with pytest
 
 We have a lot to address, but it would be nice to integrate our end to end test
@@ -196,10 +198,10 @@ The actual name of the function is for your benefit only so don't be worried if
 it is "too long".  You won't have to type it so be descriptive!  Next we have the
 three steps in all tests: Arrange-Act-Assert (aka Given-When-Then)
 
-- Arrange: Set up the system in a particular way to test the feature you want.
+- Arrange: Set up the state of the program in a particular way to test the feature you want.
 Consider edge cases, mocking databases or files, building helper objects, etc.
 - Act: Call the code you want to test
-- Assert: Confirm the observable outputs are what you expect.  Notice that the
+- Assert: Confirm the observable outputs are what you expect (i.e. compare the output with the expected output).  Notice that the
 outputs here read like the actual output file.
 
 Again, pytest uses plain assert statements to test results.

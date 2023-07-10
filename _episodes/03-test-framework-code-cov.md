@@ -10,6 +10,7 @@ objectives:
 keypoints:
 - "A test framework simplifies adding tests to your project."
 - "Choose a framework that doesn't get in your way and makes testing fun."
+- "Coverage tools are useful to identify which parts of the code are executed with tests"
 ---
 # pytest: A test framework
 While it is not practical to test a program with all possible inputs we should
