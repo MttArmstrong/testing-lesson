@@ -1,6 +1,6 @@
 ---
 title: "Working with Legacy Code"
-teaching: 10
+teaching: 20
 exercises: 15
 questions:
 - "What is legacy code?"
@@ -20,7 +20,7 @@ keypoints:
 Imagine you are joining a new lab and have inherited a script from
 another grad student or published paper.  It takes in a file with coordinates
 of rectangles and produces a matrix where the value at index `i,j == 1` if rectangle
-`i` overlaps with rectangle `j`, and 0 otherwise.  Here is the starting script
+`i` overlaps with rectangle `j`, and `0` otherwise.  Here is the starting script
 
 ```python
 import sys
@@ -65,14 +65,14 @@ outfile.close()
 >>
 > > ## Solution
 > > Starting with good things:
-> > 1. Variable names are fairly clear and properly formatted
+> > 1. Variable names are fairly clear and properly formatted (snake case)
 > > 2. Comments are used properly
 > > 3. Runs without errors
 > > 4. Dependencies are handled (no dependencies)
 > >
 > > And some of the issues:
-> > 1. Unable to import
-> > 2. No encoding specified on open
+> > 1. Unable to import as a module
+> > 2. No encoding specified on `open`
 > > 3. Redundant execution in main loop
 > > 4. Several assumptions made without checking or asserting correctness (hi vs. low, int coords)
 > > 5. Shadowing `dict` keywords
@@ -108,7 +108,7 @@ cases without testing smaller parts of a codebase.
 
 Like all tests, passing does not verify correctness just that the tests are not
 failing.  Still, it is reassuring that some larger refactoring isn't breaking
-published code!  Let's start with this simple input file (the header has the format #name	x1	y1	x2	y2):
+published code!  Let's start with this simple input file (the columns are `name	x1	y1	x2	y2`):
 ```input.txt
 a	0	0	2	2
 b	1	1	3	3
@@ -128,8 +128,8 @@ the following matrix:
 > What are some issues with the sample input?  Is the result still useful?
 >>
 > > ## Solution
-> > The input doesn't test rectangles where `x != y` or really challenge more
-> > interesting cases (overlap at a point, a line, overlap exactly, etc).
+> > The input doesn't test rectangles where `x != y` or really exercise the
+> > code with more interesting cases (overlap at a point, a line, overlap exactly, etc).
 > > 
 > > The result can still be useful *if it fails*.  Knowing something that was
 > > working has stopped working can notify you an error is present.  However,

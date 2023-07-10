@@ -1,6 +1,6 @@
 ---
 title: "Test framework"
-teaching: 10
+teaching: 15
 exercises: 15
 questions:
 - "What is a test framework?"
@@ -8,7 +8,8 @@ questions:
 objectives:
 - "Start running tests with pytest."
 keypoints:
-- 
+- "A test framework simplifies adding tests to your project."
+- "Choose a framework that doesn't get in your way and makes testing fun."
 ---
 # pytest: A test framework
 While it is not practical to test a program with all possible inputs we should
@@ -68,9 +69,10 @@ FAILED test_nothing.py::test_failure - assert 0
 Note that two tests were found.  Passing tests are marked with a green `.` while
 failures are `F` and exceptions are `E`.
 
-## Writng actual test cases
+## Writing actual test cases
 
-Let's understand writing a test case using the following fucntion that computes that is supporse to compute x + 1 given x. However, note that it has a very obvious bug.
+Let's understand writing a test case using the following function that 
+is supposed to compute `x + 1` given `x`. Note the very obvious bug.
 
 ```python
 # sample_calc.py
@@ -82,16 +84,23 @@ A typical test case consits of the following components:
 2. A call to the function under test with the test input.
 3. A statement to compare the output with the expected output.
 
-Following is a simple test case written to test func(x). Note that we have given a descriptive name to show what function is tested and and with what type of input. This is a good practice to increase the readability of tests. The test input here is 3 and the expected output is 4. The assert statement checks the equality of the two.
+Following is a simple test case written to test `func(x)`. Note that we have
+given a descriptive name to show what function is tested and and with what type
+of input. This is a good practice to increase the readability of tests. You
+shouldn't have to explicitly call the test functions, so don't worry if the
+names are longer than you would normally use. The test input here is 3 and the
+expected output is 4. The assert statement checks the equality of the two.
 
 ```python
 #test_sample_calc.py
 import sample_calc as sc
 
 def test_func_for_positive_int():
-    assert sc.func(3) == 4
+    input_value = 3                     # 1. test input
+    func_output = sc.func(input_value)  # 2. call function
+    assert func_output == 4             # 3. compare output with expected
 ```
-When the test is executed it is going to fail due to the bug.
+When the test is executed it is going to fail due to the bug in `func`.
 ```bash
 $ pytest test_sample_calc.py 
 ============================= test session starts ==============================
@@ -119,20 +128,52 @@ FAILED test_sample_calc.py::test_answer - assert 2 == 4
 ```
 
 {: .challenge}
-1. Fix the bug in the code.
-2. Add two tests test with a negative number and zero.
+> ## Improve the code
+> Modify `func` and `test_sample_calc.py`:
+  1. Fix the bug in the code.
+  2. Add two tests test with a negative number and zero. 
+>
+>>
+> > ## Solution
+> > 1. Clearly `func` should return `x + 1` instead of `x - 1`
+> > 2. Here are some additional assert statements to test more values.
+> > ```python
+> > assert sc.func(0) == 1
+> > assert sc.func(-1) == 0
+> > assert sc.func(-3) == -2
+> > assert sc.func(10) == 11
+> > ```
+> > How you organize those calls is a matter of style.  You could have one
+> > `test_` function for each or group them into a single `test_func_hard_inputs`.
+> > Pytest code is just python code, so you could set up a loop or use the
+> > `pytest.parameterize` decorator to call the same code with different inputs.
+> {: .solution}
+{: .challenge}
 
-Now that we know how to use the pytest framework, we can use it with our legacy code base!
+
+We will cover more features of pytest as we need them.  Now that we know how to
+use the pytest framework, we can use it with our legacy code base!
 
 # What is code (test) coverage
 
-The term *code coverage* or *coverage* is used to refer to the code constructs such as statments and branches executed by your test cases. 
+The term *code coverage* or *coverage* is used to refer to the code constructs
+such as statements and branches executed by your test cases. 
 
-Note: It is not recommended to create test cases to simply to cover the code. This can lead to creating useless test cases. Rather, coverage should be used to learn about which parts of the code are not executed by a test case and use that infomation to augment test cases to check the respective functinality of th the code.
+Note: It is not recommended to create test cases to simply to cover the code.
+This can lead to creating useless test cases and a false sense of security.
+Rather, coverage should be used to learn about which parts of the code are not
+executed by a test case and use that information to augment test cases to check
+the respective functionality of the code.  In open source projects, assuring
+high coverage can force contributors to test their new code.
 
-We will be using [Coverage.py] (https://coverage.readthedocs.io/en/7.2.7/#) to calculate the coverage of the test cases that we computed above. Follow the instructions [here] (https://coverage.readthedocs.io/en/7.2.7/install.html) to install Coverage.py.
+We will be using [Coverage.py](https://coverage.readthedocs.io/en/7.2.7/#) to
+calculate the coverage of the test cases that we computed above. Follow the
+instructions [here](https://coverage.readthedocs.io/en/7.2.7/install.html) to
+install Coverage.py.
 
-Now let's use Coverage.py to check the coverage of the tests we created for fun(x), To run your tests using pytest under coverage you need to use the **coverage run** command:
+Now let's use Coverage.py to check the coverage of the tests we created for
+`func(x)`, To run your tests using pytest under coverage you need to use the
+`coverage run` command:
 ```bash
 $ coverage run -m pytest test_sample_calc.py 
 ============================= test session starts ==============================
@@ -157,7 +198,7 @@ test_sample_calc.py:4: AssertionError
 FAILED test_sample_calc.py::test_answer - assert 2 == 4
 ============================== 1 failed in 0.31s ===============================
 ```
-To get a report of the coverage use the command **coverage repoart**:
+To get a report of the coverage use the command `coverage report`:
 ```bash
 $ coverage report
 Name                  Stmts   Miss  Cover
@@ -167,9 +208,8 @@ test_sample_calc.py       3      0   100%
 -----------------------------------------
 TOTAL                     5      0   100%
 ```
-To get the coverage of both branches and statments you can use the **
-Note the statement coverage of sample_calc.py which is 100% right now.  We can also speciafically check for the executed branches using the **--branch** flag with the **coverage run** command. You can use the **-m** flag with the **coverage report** command to see which statments are missed with the test cases if there is any and update the test cases accordingly.
-
-
-
-
+Note the statement coverage of sample_calc.py which is 100% right now.  We can
+also specifically check for the executed branches using the `--branch` flag
+with the `coverage run` command. You can use the `--module` flag with the
+`coverage report` command to see which statements are missed with the test
+cases if there is any and update the test cases accordingly.
