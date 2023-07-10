@@ -1,16 +1,18 @@
 ---
 title: "Refactoring for Testing"
-teaching: 0
-exercises: 0
+teaching: 20
+exercises: 20
 questions:
 - "Why are long methods hard to test?"
 objectives:
 - "Learn some key refactoring methods to change code safely."
 - "Modify the overlap script to support a Rectangle object."
 keypoints:
+- "Testing long methods is difficult since you can't pinpoint a few lines of logic."
 - "Testable code is also good code!"
 - "Changing code without tests can be dangerous.  Work slowly and carefully making only the simplest changes first."
 - "Write tests with an adversarial viewpoint."
+- "Keep tests DRY, fixtures and parameter can help."
 ---
 # Monolithic Main Methods
 
@@ -18,8 +20,9 @@ One of the smelliest code smells that new developers make is having a single
 main method which spans several hundred (thousand?) lines.  Even if the code
 is perfect, long methods are an anti-pattern because they require a reader of
 the code to have exceptionally good working memory to understand the method.
+It also becomes impossible to reuse part of the code elsewhere.
 
-Consider the following two codes:
+Consider the following two sections of code:
 ```python
 if user is not None and user in database and database[user]['type'] == 'admin':
     # do admin work
@@ -249,7 +252,7 @@ several lines or modules away.
 >>        result[name] = value
 >>    return result
 >> ```
->> Notice how the test code is much longer than the actual source code, this is
+>> Notice how the test code is much longer than the source code, this is
 >> typical for well-tested code.
 > {: .solution}
 {: .challenge}
@@ -259,6 +262,8 @@ pathological cases?  The answer is no (for most).  We already know our `read_rec
 will handle the incorrect number of coordinates by throwing an informative error
 so it would be redundant to see if the main method has the same behavior.  However,
 it would be useful to document what happens if an empty input file is supplied.
+Maybe you want `read_rectangles` to return an empty dict but the main method should
+warn the user or fail.
 
 The decision not to test something in multiple places is more important than
 being efficient with our time writing tests.  Say we want to change the message
@@ -353,9 +358,10 @@ rectangles to guide your testing:
         └──┘               └──┘             
 ```
 For each, consider swapping the red and blue labels and rotating 90 degrees.
-If you thought the rotation function would be useful elsewhere, you could
-add it to your script, but for now we will keep it in our pytest code.  First,
-write some failing unit tests of our new helper function:
+Rotating a coordinate 90 degrees clockwise is simply swapping x and y while
+negating the new y value.  If you thought the rotation function would be useful
+elsewhere, you could add it to your script, but for now we will keep it in our
+pytest code.  First, write some failing unit tests of our new helper function:
 ```python
 # test_overlap.py
 def test_rotate_rectangle():
@@ -373,10 +379,9 @@ def test_rotate_rectangle():
     rectangle = rotate_rectangle(rectangle)
     assert rectangle == [1, 2, 3, 3]
 ```
-Writing out the different permutations was challenging (for me, at least).
-Rotating a coordinate 90 degrees clockwise is simply swapping x and y while
-negating the new y value.  Then you need to produce the correct rectangle where
-x1 <= x2.
+Writing out the different permutations was challenging (for me, at least),
+probably related to having unnamed attributes for our rectangle as a list of
+numbers...  Then you need to produce the correct rectangle where `x1 <= x2`.
 ```python
 # test_overlap.py
 def rotate_rectangle(rectangle):
@@ -392,12 +397,14 @@ def rotate_rectangle(rectangle):
 ```
 Notice this is *still* in our test file.  We don't want it in our project and
 it's just a helper for our tests, we could use it elsewhere in later tests.
-Since the function is non-trivial we also have it tested.
+Since the function is non-trivial we also have it tested.  For helper functions
+that mutate or wrap inputs, you *could* have them non-tested but beware the
+simple helper function may evolve into something more complex!
 
 {: .challenge}
 > ### Test the first overlap orientation
 > Start with the first type of overlap (over corners).  Set one rectangle to
-> `(-1, -1, 1, 1)` and place the second rectangle.  Transform the rectangle by
+> `(-1, -1, 1, 1)` and place the second rectangle.  Transform the second rectangle by
 > rotating it around the origin 3 times and test the `rects_overlap` function
 > for each overlap and red/blue assignment. Hint: pytest code is still python!
 >> ## Solution
@@ -424,21 +431,103 @@ Since the function is non-trivial we also have it tested.
 >>
 >>        rectangle_2 = rotate_rectangle(rectangle_2)
 >> ```
->> I declare the result for reasons you see next.
+>> I declare the result to simplify parameterize introduced next.
 > {: .solution}
 {: .challenge}
 
-With our `test_rects_overlap_permutations` written for one rectangle, you may
+We have `test_rects_overlap_permutations` written for one rectangle. You may
 be tempted to copy and paste the function multiple times and declare a different
 `rectangle_2` and result for each orientation we came up with above.  To avoid
 code duplication, you could make our test a helper function, but pytest has
 a better builtin option, `parameterize`.
 
-## TODO Better intro to parameterize.
+## `pytest.mark.parametrize`
+Parametrizing a test function allows you to easily repeat its execution with
+different input values.  Using parameters cuts down on duplication and can
+vastly increase the input space you can explore by nesting parameters.
 
-Here is the parameterized version.  I added the unicode rectangle images because
-I already made them above and it seemed like a shame to not reuse.  Normally
-I wouldn't spend time making them but use a text descriptor.
+Let's work on testing the following function:
+```python
+def square_sometimes(value, condition):
+    if condition:
+        raise ValueError()
+    return value ** 2
+```
+Fully testing this function requires testing a variety of `value`s and ensuring
+when `condition is True` the function instead raises an error.  Here are a few
+tests showing how you could write multiple test functions:
+```python
+def test_square_sometimes_number_false():
+    assert square_sometimes(4, False) == 16
+
+def test_square_sometimes_number_true():
+    with pytest.raises(ValueError):
+        square_sometimes(4, True)
+
+def test_square_sometimes_list_false():
+    assert square_sometimes([1, 1], False) == [1, 1, 1, 1]
+
+def test_square_sometimes_list_true():
+    with pytest.raises(ValueError):
+        square_sometimes([1, 1], True)
+...
+```
+
+Hopefully that code duplication is making your skin crawl!  Maybe instead you
+write a helper function to check the value of condition:
+```python
+def square_sometimes_test_helper(value, condition, output):
+    if condition:
+        with pytest.raises(ValueError):
+            square_sometimes(value, condition)
+    else:
+        assert square_sometimes(value, condition) == output
+```
+
+Then you can replace some of your tests with the helper calls:
+```python
+def test_square_sometimes_number():
+    square_sometimes_test_helper(4, False, 16)
+    square_sometimes_test_helper(4, True, 16)
+
+def test_square_sometimes_list():
+    square_sometimes_test_helper([1, 1], False, [1, 1, 1, 1])
+    square_sometimes_test_helper([1, 1], True, [1, 1, 1, 1])
+...
+```
+
+You could imagine wrapping the helper calls in a loop and you'd basically have
+a parametrized test.  Using `pytest.mark.parametrize` you'd instead have:
+```python
+@pytest.mark.parametrize(
+    'value,output',
+    [
+        (4, 16),
+        ([1,1], [1,1,1,1]),
+        ('asdf', 'asdfasdf'),
+    ]
+)
+@pytest.mark.paramterize('condition', [True, False])
+def test_square_sometimes(value, condition, output):
+    if condition:
+        with pytest.raises(ValueError):
+            square_sometimes(value, condition)
+    else:
+        assert square_sometimes(value, condition) == output
+```
+
+pytest will generate the cross product of all nested parameters, here producing
+6 tests.  Notice how there is no code duplication and if you come up with another
+test input, you just have to add it to the 'value,output' list; testing each
+condition will automatically happen.  Compared with coding the loops yourself,
+pytest generates better error reporting on what set of parameters failed.  Like
+most of pytest, there is a lot more we aren't covering like mixing parameters
+and fixtures.
+
+Here is the parameterized version of `test_rects_overlap_permutations`.  I
+added the unicode rectangle images because I already made them above and it
+seemed like a shame to not reuse.  Normally I wouldn't spend time making them
+and instead use a text descriptor, e.g. "Corners overlap".
 ```python
 rectangle_strs = ['''
 ┌───┐  
@@ -490,7 +579,7 @@ def test_rects_overlap_permutations(rectangle_2, rectangle_str, result):
 Now failed tests will also show the image along with information to recreate
 any failures.  Running the above should fail... Time to get back to green.
 
-Note that with parameterize, each set of parameters will be run.  E.g. failing
+Note that with parameterize, each set of parameters will be run, e.g. failing
 on the second rectangle will not affect the running on the third rectangle.
 
 {: .challenge}

@@ -1,17 +1,20 @@
 ---
-title: "Making Big Changes with Tests"
-teaching: 0
-exercises: 0
+title: "Testing Big Changes"
+teaching: 20
+exercises: 30
 questions:
-- "Key question (FIXME)"
+- "What does it mean if you have to change a lot of tests while adding features?"
+- "What are the advantages of testing an interface?"
 objectives:
-- "First learning objective. (FIXME)"
+- "Add a `Rectangle` class"
+- "Learn how to use TDD when making large changes to code"
 keypoints:
-- "First key point. Brief Answer to questions. (FIXME)"
+- "Changing a lot of test code for minor features can indicate your tests are not DRY and heavily coupled."
+- "Testing a module's interface focuses tests on what a user would typically observe.  You don't have to change as many tests when internal change."
 ---
 
 # Making big changes
-With this fairly simple example, we have basically tested our codebase fully.  You
+With this fairly simple example, we have fully tested our codebase.  You
 can rest easy knowing the code is working as well as you've tested it.  We have
 made a few changes to what the legacy code used to do and even found a bug.
 Still, our code functions basically the same as it did (perhaps more correct).
@@ -21,8 +24,8 @@ The answer depends on how well you tested the interface vs the implementation.
 If your tests are full of duplication, you will have to change *a lot* of the
 test code.  Now you would want to make a commit of this version of the code and
 get ready to shake things up.  Even if it seems like you are spending a lot of
-time messing with the tests, at the end once everything is passes you should
-have the same confidence your code is working.
+time messing with the tests, at the end once everything passes you should
+have the same confidence in your code.
 
 ## Testing the interface vs the implementation
 Consider a database object that performs a query and then can return a result
@@ -369,7 +372,7 @@ a Rectangle method with the following signature `def overlap(self, other: Rectan
 
 > ### Red, green, refactor
 > Perform an iteration of TDD to add the `overlap` method to `Rectangle`.  Hint,
-> Start with only the `test_rects_overlap` test for now.
+> start with only the `test_rects_overlap` test for now.
 >> ## Solution
 >> ### Red
 >> ```python
@@ -387,7 +390,7 @@ a Rectangle method with the following signature `def overlap(self, other: Rectan
 >>     assert rectangles['a'].overlap(rectangles['c']) is None
 >> ```
 >> ### Green
->> You can copy most of the current code to the new method with some minor changes.
+>> You can copy most of the current code to the new method with changes to variable names.
 >> ```python
 >> # overlap.py
 >> class Rectangle:
@@ -416,7 +419,7 @@ a Rectangle method with the following signature `def overlap(self, other: Rectan
 > {: .solution}
 {: .challenge}
 
-Wrapping up the overlap tests, we need to work on rotate_rectangle and the
+Wrapping up the overlap tests, we need to work on `rotate_rectangle` and the
 overlap permutations function.  I think it makes sense to move our rotate
 function to `Rectangle` now.  While we don't use it in our main method, the class
 is becoming general enough to be used outside our current script.

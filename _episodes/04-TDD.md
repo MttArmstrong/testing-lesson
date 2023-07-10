@@ -9,6 +9,8 @@ objectives:
 - "Start running tests with pytest."
 - "Replace the end-to-end test with a pytest version."
 keypoints:
+- "TDD cycles between the phases red, green, and refactor"
+- "TDD cycles should be fast, run tests on every write"
 - "Writing tests first ensures you *have* tests and that they are working"
 - "Making code testable forces better style"
 - "It is much faster to work with code under test"
@@ -24,7 +26,8 @@ say TDD makes code less buggy, though that may not be strictly true.  Still, TDD
 provides at least three major benefits:
 
 - It greatly informs the *design*, making for more maintainable,
- legible and generally pretty code
+ legible and generally pretty code.  Writing code is much faster since you've
+ already made the difficult decisions about its interface.
 
 - It ensures that tests will *exist* in the first place (b/c
  you are writing them first).  Remember, everyone dislikes
@@ -121,7 +124,7 @@ You can be extra thorough and see if `end-to-end.sh` still passes.
 At this point, our pytest function is just making sure we can import the code.
 But our end-to-end test makes sure the entire function is working as expected
 (albeit for a small, simple input).  How about we move the file IO into the main
-guard.
+guard?
 
 {: .challenge}
 > ## Refactor
@@ -155,7 +158,7 @@ outfile variables don't have to be open files on disk, they can be in memory fil
 In python, this is accomplished with a StringIO object from the io library.
 
 A StringIO object acts just like an open file.  You can read and iterate from
-it just like an opened text file and you can write to it.  When you want to 
+it and you can write to it just like an opened text file.  When you want to 
 read the contents, use the function `getvalue` to get a string representation.
 
 ### Red
@@ -266,8 +269,8 @@ the change and not have a tab followed by a newline.
 Let's focus this round of refactoring on our test code and introduce some nice
 pytest features.  First, it seems like we will want to use our simple input
 file in other tests.  Instead of copying and pasting it around, let's extract it
-as a *fixture*.  Pytest fixtures can do a lot, but for now we just need an object
-built for some tests:
+as a *fixture*.  Pytest fixtures can do a lot, but for now we just need a
+StringIO object built for some tests:
 ```python
 # test_overlap.py
 import overlap_v1 as overlap
@@ -290,12 +293,12 @@ def test_end_to_end(simple_input):
 We start by importing pytest so we can use the `@pytest.fixture()` decorator.
 This decorates a function and makes its return value available to any function
 that uses it as an input argument.  Next we can replace our `infile` definition
-by assigning it to `simple_input`.
+by assigning it to `simple_input` in `test_end_to_end`.
 
 For this code, the end-to-end test runs quickly, but what if it took several
 minutes?  Ideally we could run our fast tests all the time and occasionally run
-everything.  The simplest way to achieve this with pytest is to mark the function
-as slow and invoke pytest with `pytest -m "not slow"`:
+everything, including slow tests.  The simplest way to achieve this with pytest
+is to mark the function as slow and invoke pytest with `pytest -m "not slow"`:
 
 ```python
 # test_overlap.py
