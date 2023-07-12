@@ -1,7 +1,7 @@
 ---
 title: "Refactoring for Testing"
 teaching: 20
-exercises: 20
+exercises: 40
 questions:
 - "Why are long methods hard to test?"
 objectives:
@@ -144,6 +144,8 @@ it to `rectangles` and add a type annotation to show what we expect as input.
 Now is also the time to add a doc string.  Make changes step-wise and run your
 tests frequently.
 ```python
+from collections.abc import Iterable
+
 def main(infile, outfile):
     rectangles = read_rectangles(infile)
     ...
@@ -316,10 +318,10 @@ we will change our return type to another rectangle.
 >>        'c': [10, 10, 11, 11],
 >>    }
 >>
->>    assert rects_overlap(rectangles['a'], rectangles['a']) is True
->>    assert rects_overlap(rectangles['a'], rectangles['b']) is True
->>    assert rects_overlap(rectangles['b'], rectangles['a']) is True
->>    assert rects_overlap(rectangles['a'], rectangles['c']) is False
+>>    assert overlap.rects_overlap(rectangles['a'], rectangles['a']) is True
+>>    assert overlap.rects_overlap(rectangles['a'], rectangles['b']) is True
+>>    assert overlap.rects_overlap(rectangles['b'], rectangles['a']) is True
+>>    assert overlap.rects_overlap(rectangles['a'], rectangles['c']) is False
 >> ```
 >> ```python
 >># overlap.py

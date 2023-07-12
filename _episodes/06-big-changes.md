@@ -1,7 +1,7 @@
 ---
 title: "Testing Big Changes"
 teaching: 20
-exercises: 30
+exercises: 40
 questions:
 - "What does it mean if you have to change a lot of tests while adding features?"
 - "What are the advantages of testing an interface?"
@@ -101,7 +101,9 @@ Simple enough, instead of False we should return None and instead of True we
 need to make a new rectangle with the smaller of the coordinates.
 ```python
 # overlap.py
-def rects_overlap(red, blue) -> list[float] | None:
+from typing import Optional
+
+def rects_overlap(red, blue) -> Optional[list[float]]:
     red_lo_x, red_lo_y, red_hi_x, red_hi_y = red
     blue_lo_x, blue_lo_y, blue_hi_x, blue_hi_y = blue
 
@@ -149,6 +151,20 @@ def test_rects_overlap_permutations(rectangle_2, rectangle_str, result):
 
         rectangle_2 = rotate_rectangle(rectangle_2)
         result = rotate_rectangle(result)
+
+def rotate_rectangle(rectangle):
+    if rectangle is None:
+        return None
+
+    x1, y1, x2, y2 = rectangle
+    x1, y1 = y1, -x1
+    x2, y2 = y2, -x2
+
+    # make sure x1 <= x2, value = [x1, y1, x2, y2]
+    x1, x2 = min(x1, x2), max(x1, x2)
+    y1, y2 = min(y1, y2), max(y1, y2)
+
+    return [x1, y1, x2, y2]
 ```
 
 ### Refactor
@@ -534,7 +550,7 @@ but we do use it in our main script.  The last function to change is `read_recta
 >> This is not a real green since other tests are failing, but at least
 >> `test_read_rectangles_simple` is passing.
 >> ### Refactor
->> You have to touch a lot of test code to get everything passing.  Afterwards
+>> You have to touch a lot of test code to get everything passing. Also you need to modify the main method. Afterwards
 >> you can finally remove `rects_overlap`.
 > {: .solution}
 {: .challenge}
