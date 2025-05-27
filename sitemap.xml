@@ -13,7 +13,13 @@
     <loc>https://INTERSECT-training.github.io/testing-lesson/TDD.html</loc>
   </url>
   <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/aio.html</loc>
+  </url>
+  <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/big-changes.html</loc>
+  </url>
+  <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/images.html</loc>
   </url>
   <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/index.html</loc>
@@ -31,13 +37,25 @@
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/TDD.html</loc>
   </url>
   <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/aio.html</loc>
+  </url>
+  <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/big-changes.html</loc>
+  </url>
+  <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/images.html</loc>
   </url>
   <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/index.html</loc>
   </url>
   <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/instructor-notes.html</loc>
+  </url>
+  <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/key-points.html</loc>
   </url>
   <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/legacy-codebase.html</loc>
@@ -55,7 +73,13 @@
     <loc>https://INTERSECT-training.github.io/testing-lesson/instructor/test-framework-code-cov.html</loc>
   </url>
   <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/instructor-notes.html</loc>
+  </url>
+  <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://INTERSECT-training.github.io/testing-lesson/key-points.html</loc>
   </url>
   <url>
     <loc>https://INTERSECT-training.github.io/testing-lesson/legacy-codebase.html</loc>
